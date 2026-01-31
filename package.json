@@ -1,0 +1,13 @@
+{
+  "name": "type-safety-spectrum-slides",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "slides:preview": "marp type-safety-spectrum-slides.md --preview",
+    "slides:html": "marp type-safety-spectrum-slides.md -o type-safety-spectrum-slides.html",
+    "slides:pdf": "marp type-safety-spectrum-slides.md -o type-safety-spectrum-slides.pdf"
+  },
+  "devDependencies": {
+    "@marp-team/marp-cli": "^3.4.0"
+  }
+}
