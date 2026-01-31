@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "build": "marp type-safety-spectrum-slides.md -o dist/index.html",
     "slides:preview": "marp type-safety-spectrum-slides.md --preview",
     "slides:html": "marp type-safety-spectrum-slides.md -o type-safety-spectrum-slides.html",
     "slides:pdf": "marp type-safety-spectrum-slides.md -o type-safety-spectrum-slides.pdf"
