@@ -253,7 +253,7 @@ if (variant === 'new') { ... }  // 💥 Object never equals string
 
 Forms, URL params, localStorage — users and extensions can send anything.
 
-```vue
+```html
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 
@@ -336,7 +336,7 @@ const { orders } = await fetchOrders()  // orders === undefined. 💥
 
 ### 3.1 UI Components — Medium Safety
 
-```vue
+```html
 <!-- Props can be loose — component changes frequently -->
 <script setup lang="ts">
 defineProps<{
@@ -359,7 +359,7 @@ defineProps<{
 
 ### 3.2 Forms — High Safety
 
-```vue
+```html
 <script setup lang="ts">
 import { ref } from 'vue'
 import { z } from 'zod'
@@ -538,7 +538,7 @@ type Order = z.infer<typeof OrderResponseSchema>
 
 Invalid input → clear errors, not silent bugs or wrong DB writes.
 
-```vue
+```html
 <script setup lang="ts">
 const CheckoutSchema = z.object({
   email: z.string().email(),
@@ -738,7 +738,7 @@ function updateUser(updates: Partial<User>) {
 
 ### 6.6 Example: Types That Block Refactoring
 
-```vue
+```html
 <!-- Over-tight coupling — changing User breaks 50 components -->
 <script setup lang="ts">
 defineProps<{
@@ -868,7 +868,7 @@ const userId = z.coerce.number().parse(route.query.userId)
 
 If changing a type breaks the world, it's too coupled.
 
-```vue
+```html
 <!-- ❌ Tight — User change breaks 50 components -->
 <script setup lang="ts">
 defineProps<{ user: { id: number; email: string; avatar: string; role: Role } }>()
@@ -1059,7 +1059,7 @@ components:
         total: { type: number }
 ```
 
-```vue
+```html
 <script setup lang="ts">
 // Generated types + schemas
 import { OrderSchema, type Order } from '@/api/generated'
