@@ -1355,3 +1355,97 @@ terraform/
 **Starter templates:** AI/ML Inference API, API Backend, Microservices, E-commerce, SaaS Multi-tenant, Serverless API, Data Pipeline, Full Stack.
 
 *[React2AWS](https://github.com/mmarinovic/React2AWS) | [react2aws.xyz](https://react2aws.xyz)*
+
+---
+
+## Appendix: A Glimpse on Temporals
+
+---
+
+### Temporal — Date is out, Temporal is in
+
+JavaScript's `Date` is a source of confusion, bugs, and inconsistencies. **Temporal** is a modern TC39 standard API designed to handle dates and times correctly, safely, and predictably.
+
+**Temporal is a replacement for `Date`.**
+
+*Source: [Date is out, Temporal is in](https://piccalil.li/blog/date-is-out-temporal-is-in/) — Mat "Wilto" Marquis*
+
+---
+
+### Why `Date` Is Problematic
+
+| Issue | Example |
+|-------|---------|
+| **Zero-based months** | `new Date(2026, 1, 1)` → February 1st, not January |
+| **Broken parsing** | `new Date("49")` → 2049, `new Date("99")` → 1999 |
+| **Timezone inconsistency** | `"2026/01/02"` = local, `"2026-01-02"` = UTC |
+| **Mutability** | `d.setDate(...)` mutates in place — side effects, bugs |
+
+---
+
+### Temporal — Namespace & Core Types
+
+Temporal works like `Math` — a namespace, not a constructor.
+
+```ts
+Temporal.Now.plainDateISO()  // ✅
+new Temporal()              // ❌ Error
+```
+
+| Type | Purpose |
+|------|---------|
+| `Temporal.PlainDate` | Date only (YYYY-MM-DD) |
+| `Temporal.PlainTime` | Time only |
+| `Temporal.PlainDateTime` | Date + time |
+| `Temporal.ZonedDateTime` | Date + time + timezone |
+| `Temporal.Instant` | Exact moment in time |
+| `Temporal.Duration` | Spans of time |
+
+---
+
+### Temporal — Immutability & Chaining
+
+```ts
+const today = Temporal.Now.plainDateISO()
+const tomorrow = today.add({ days: 1 })
+
+console.log(today)     // unchanged
+console.log(tomorrow)  // new value
+```
+
+```ts
+today
+  .add({ months: 1 })
+  .subtract({ years: 2 })
+  .add({ days: 10 })
+```
+
+`add()` and `subtract()` return new values. No mutations.
+
+---
+
+### Temporal — Durations & Timezones
+
+**Human-readable date math:**
+```ts
+const jsBirth = Temporal.PlainDate.from('1995-12-04')
+const now = Temporal.Now.plainDateISO()
+const diff = now.since(jsBirth, { largestUnit: 'year' })
+// → "29 years, 1 months, 28 days"
+```
+
+**Explicit timezones:**
+```ts
+today.toZonedDateTime('Europe/London')
+```
+
+---
+
+### Temporal — Status & Takeaway
+
+- **TC39 Stage 3** — Actively implemented in modern browsers
+- Designed as the long-term **replacement** for `Date`
+- Clear separation between date, time, and timezone
+- Predictable parsing, no surprising mutations
+
+**Recommendation:** Start experimenting with Temporal; plan migrations away from `Date` where possible.
