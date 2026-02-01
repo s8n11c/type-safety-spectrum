@@ -1449,3 +1449,14 @@ today.toZonedDateTime('Europe/London')
 - Predictable parsing, no surprising mutations
 
 **Recommendation:** Start experimenting with Temporal; plan migrations away from `Date` where possible.
+
+---
+
+## Good Reads
+
+| Topic | Link | Summary |
+|-------|------|---------|
+| **JS Array vs TypedArray** | [royalbhati.com](https://www.royalbhati.com/posts/js-array-vs-typedarray) | When and why to use TypedArrays over regular arrays |
+| **TypeScript Performance** | [Viget](https://www.viget.com/articles/fixing-typescript-performance-problems) | Case study: diagnosing slow tsc, traces, kysely/Prisma bottlenecks |
+| **Stop Using Barrel Files** | [TkDodo](https://tkdodo.eu/blog/please-stop-using-barrel-files) | Circular imports, dev startup time, why to avoid `index.ts` barrels |
+| **`<geolocation>` HTML** | [Chrome Blog](https://developer.chrome.com/blog/geolocation-html-element) | Declarative location element in Chrome 144, replaces imperative API |
