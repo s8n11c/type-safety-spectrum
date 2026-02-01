@@ -1107,3 +1107,251 @@ One spec. Types + runtime validation. No drift.
 - https://valibot.dev
 - https://spec.openapis.org/oas/latest.html
 - https://stevekinney.com/courses/full-stack-typescript/type-safety-vs-runtime-validation
+
+---
+
+## Appendix: Library Updates
+
+---
+
+### A.1 Nuxt Updates
+
+**Nuxt v3 End-of-Life Extended**
+
+Committed to making sure no one gets left behind, Nuxt will continue to provide **security updates** and **critical bug fix releases** beyond the previously announced end-of-life date of January 31, 2026.
+
+**Nuxt v3** will now meet its end-of-life on **July 31, 2026**.
+
+---
+
+### A.2 Route Rule Layouts (Nuxt 4.3)
+
+Set layouts directly in route rules using the new `appLayout` property — a **centralized, declarative** way to manage layouts without scattering `definePageMeta` across pages.
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  routeRules: {
+    '/admin/**': { appLayout: 'admin' },
+    '/dashboard/**': { appLayout: 'dashboard' },
+    '/auth/**': { appLayout: 'minimal' }
+  }
+})
+```
+
+**Useful for:** Admin panels, marketing pages, or any route groups that need different layouts.
+
+*Source: [Nuxt 4.3 Blog](https://nuxt.com/blog/v4-3#%EF%B8%8F-route-rule-layouts)*
+
+---
+
+### A.3 ISR/SWR Payload Extraction (Nuxt 4.3)
+
+**What is the payload?** — The data your page needs (from `useAsyncData`, `useFetch`). Nuxt can extract it into a separate `_payload.json` file so it can be cached independently.
+
+**What is ISR?** — *Incremental Static Regeneration*. Pre-render pages at build time, but **revalidate** them on a schedule (e.g. every hour). Content stays fresh without full rebuilds.
+
+**What is SWR?** — *Stale-While-Revalidate*. Serve cached content **immediately**, then fetch fresh data in the background. Users get instant response; data stays up to date.
+
+**What changed in 4.3?** — Payload extraction now works with ISR, SWR, and cache rules. Before: only fully pre-rendered pages could generate payloads.
+
+---
+
+### A.4 ISR/SWR Payload — Example & Benefits
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  routeRules: {
+    '/products/**': { isr: 3600 }  // Revalidate every hour (seconds)
+  }
+})
+```
+
+**Why it matters:**
+- **CDNs** (Vercel, Netlify, Cloudflare) can cache both HTML and `_payload.json`
+- **Client-side nav** — When you click a link, Nuxt can load payload from cache instead of hitting your API
+- **Fewer API calls** — Data is prefetched and served from the cached payload
+
+---
+
+### A.5 How Revalidation Works with CDNs
+
+**ISR with CDN:**
+1. **First request** → CDN cache miss → Request hits your origin (Nuxt server) → Page is generated → CDN stores HTML + `_payload.json`
+2. **Within TTL** (e.g. 3600s) → CDN serves cached content → No origin hit
+3. **After TTL expires** → Next request → CDN passes through to origin → Origin regenerates the page → CDN caches the new version
+
+**SWR with CDN:**
+1. **Request arrives** → CDN serves stale (cached) content **immediately** — user gets a fast response
+2. **In parallel** → A background request hits the origin to fetch fresh content
+3. **Origin** regenerates and updates its cache; CDN may receive updated headers or purge on next request
+4. **Next user** → Gets the fresh version (from CDN or origin cache)
+
+**Key point:** The CDN sits in front of your Nuxt app. It caches responses and respects cache headers. Your `isr` or `swr` value tells the platform how long to cache before revalidating.
+
+*Source: [Nuxt 4.3 Blog](https://nuxt.com/blog/v4-3#isrswr-payload-extraction)*
+
+---
+
+### A.6 Disable Modules from Layers (Nuxt 4.3)
+
+When extending Nuxt layers, you can now **disable specific modules** that you don't need. Pass `false` to the module's options:
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  extends: ['../shared-layer'],
+  // Disable @nuxt/image from the layer
+  image: false,
+})
+```
+
+**Use case:** A shared layer includes `@nuxt/image`, but your app uses a different image solution. Instead of forking the layer, you override and disable it.
+
+*Source: [Nuxt 4.3 Blog](https://nuxt.com/blog/v4-3#disable-modules-from-layers)*
+
+---
+
+### A.7 Route Groups in Page Meta (Nuxt 4.3)
+
+**Route groups** (folders in parentheses like `(protected)/`) are now exposed in page meta. Check `route.meta.groups` in middleware or anywhere you have the route.
+
+```html
+<!-- pages/(protected)/dashboard.vue -->
+<script setup lang="ts">
+// This page's meta will include: { groups: ['protected'] }
+useRoute().meta.groups
+</script>
+```
+
+```ts
+// middleware/auth.ts
+export default defineNuxtRouteMiddleware((to) => {
+  if (to.meta.groups?.includes('protected') && !isAuthenticated()) {
+    return navigateTo('/login')
+  }
+})
+```
+
+**Use case:** Convention-based route-level authorization — no need to add `definePageMeta` to every protected page.
+
+*Source: [Nuxt 4.3 Blog](https://nuxt.com/blog/v4-3#%EF%B8%8F-route-groups-in-page-meta)*
+
+---
+
+### A.8 Layout Props with `setPageLayout` (Nuxt 4.3)
+
+**What's new:** `setPageLayout` now accepts a **second parameter** to pass props to your layout. Previously you could only switch layouts; now you can also pass data into them.
+
+**Where to use it:** Typically in **middleware** — when a user enters a route, you switch layout and pass config (sidebar visibility, theme, etc.).
+
+```ts
+// middleware/admin.ts
+export default defineNuxtRouteMiddleware((to) => {
+  setPageLayout('admin', {
+    sidebar: true,
+    theme: 'dark'
+  })
+})
+```
+
+```html
+<!-- layouts/admin.vue -->
+<script setup lang="ts">
+defineProps<{
+  sidebar?: boolean
+  theme?: 'light' | 'dark'
+}>()
+</script>
+```
+
+**Use cases:** Admin layouts with a configurable sidebar, theme switching per route group, passing feature flags or user preferences to the layout.
+
+*Source: [Nuxt 4.3 Blog](https://nuxt.com/blog/v4-3#layout-props-with-setpagelayout)*
+
+---
+
+## Appendix: Weird Things in the Community
+
+---
+
+### React2AWS — Infrastructure as JSX
+
+**"Write AWS infrastructure like you write React components"**
+
+Define cloud infra using familiar JSX. Compiles to production-ready Terraform. No YAML indentation nightmares. No 500-line `.tf` files — just components.
+
+```html
+<Infrastructure>
+  <VPC className="cidr-10.0.0.0/16 region-us-east-1 single-nat" name="production">
+    <ALB className="public" name="api-lb" />
+    <Fargate className="mem-1gb cpu-0.5 port-8080 count-2" name="api" />
+    <RDS className="engine-postgres instance-lg storage-100gb multi-az" name="db" />
+  </VPC>
+</Infrastructure>
+```
+
+**Features:** Live editor, real-time preview, one-click Terraform export, 8 starter templates.
+
+---
+
+### React2AWS — How the Syntax Works
+
+Config lives in `className` using a **prefix-value** pattern (inspired by Tailwind):
+
+```html
+<!-- RDS: PostgreSQL, large instance, 100GB, multi-AZ -->
+<RDS className="engine-postgres instance-lg storage-100gb multi-az" name="api-db" />
+
+<!-- Lambda: Python 3.14, 512MB, 30s timeout -->
+<Lambda className="runtime-python3.14 mem-512mb timeout-30s" name="processor" />
+
+<!-- S3: versioning + encryption -->
+<S3 className="versioning encryption-aes256" name="assets" />
+```
+
+Nest resources inside a VPC for proper network topology — visual hierarchy shows relationships at a glance.
+
+---
+
+### React2AWS — More Examples
+
+```html
+<VPC className="cidr-10.0.0.0/16 region-us-west-2" name="prod">
+  <Fargate className="mem-2gb cpu-1 port-3000" name="web" />
+  <RDS className="engine-mysql instance-md" name="data" />
+  <Lambda className="runtime-nodejs20 mem-256mb" name="webhook" />
+</VPC>
+```
+
+| Component       | Creates                                      |
+|-----------------|----------------------------------------------|
+| `<VPC>`         | Virtual Private Cloud, subnets, NAT, routing |
+| `<RDS>`         | PostgreSQL, MySQL, MariaDB                   |
+| `<Fargate>`     | Containerized services (ECS)                 |
+| `<Lambda>`      | Serverless functions                         |
+| `<S3>`          | Object storage buckets                       |
+| `<DynamoDB>`    | NoSQL tables                                 |
+| `<ALB>`         | Application Load Balancers                   |
+
+---
+
+### React2AWS — Output & Templates
+
+**Generated Terraform structure:**
+```
+terraform/
+├── main.tf, variables.tf, outputs.tf, backend.tf
+└── modules/
+    ├── vpc/
+    ├── rds/
+    ├── fargate/
+    ├── lambda/
+    ├── s3/
+    └── dynamodb/
+```
+
+**Starter templates:** AI/ML Inference API, API Backend, Microservices, E-commerce, SaaS Multi-tenant, Serverless API, Data Pipeline, Full Stack.
+
+*[React2AWS](https://github.com/mmarinovic/React2AWS) | [react2aws.xyz](https://react2aws.xyz)*
